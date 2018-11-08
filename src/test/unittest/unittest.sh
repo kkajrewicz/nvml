@@ -3626,3 +3626,26 @@ function turn_on_checking_bad_blocks_node()
 
 	expect_normal_exit run_on_node $1 "../pmempool feature -e CHECK_BAD_BLOCKS $FILE &>> $PREP_LOG_FILE"
 }
+
+#
+# require_bad_block_tests_enabled -
+#
+function require_bad_block_tests_enabled() {
+    local DEVICE=$1
+
+	if [ "$BADBLOCK_TESTS_TYPE" == "NFIT_TEST" ]; then
+	    require_kernel_module nfit_test
+    elif [ "$BADBLOCK_TESTS_TYPE" == "REAL_HW" ]; then
+        if [ "$DEVICE" == "block_device" ]; then
+            require_fs_type pmem
+        elif [ "$DEVICE" == "dax_device" ]; then
+            require_dax_devices 1
+        else
+            msg "$UNITTEST_NAME: SKIP: invalid device type provided"
+            exit 0
+         fi
+    else
+        msg "$UNITTEST_NAME: SKIP: bad block tests are not enabled in testconfig.sh"
+		exit 0
+	fi
+}
